@@ -55,6 +55,8 @@ def getXticks(amplToExon,amplToIntron,ampliconsOrder):
                 xticks2.append('intron')
             elif prevExonIntronNumWithoutExIn==100:
                 xticks2.append('up')
+            elif prevExonIntronNumWithoutExIn==200:
+                xticks2.append('up')
             else:
                 print('ERROR! Unknown xticks2')
                 print(prevExonIntronNumWithoutExIn)
