@@ -23,8 +23,7 @@ def getExonCoordinates(version='hg19'):
     for ex in exons[version]:
         start,end=ex.split('..')
         brca1_exons.append([int(start),int(end)])
-    if version=='hg19':
-        brca1_exons=brca1_exons[::-1]
+    brca1_exons=brca1_exons[::-1]
     posToExon1={}
     for i,exon in enumerate(brca1_exons):
         for pos in range(exon[0],exon[1]+1):
