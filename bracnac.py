@@ -55,7 +55,7 @@ class BRACNAC(QObject):
             print('ERROR! Reference genome can be only "hg19" or "hg38"')
             exit(1)
         # Getting CDS coordinates
-        brca1exons,brca2exons,posToExon1,posToExon2=getExonCoordinates()
+        brca1exons,brca2exons,posToExon1,posToExon2=getExonCoordinates(version=self.refVersion)
 
         # Getting patient table
         if self.patFile:
