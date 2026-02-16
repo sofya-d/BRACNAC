@@ -27,7 +27,7 @@ python bracnac.py -in file_with_coverage.csv -af file_with_coordinates.csv -out 
 ```
 BRACNAC can be used with graphical interface or in command-line version. As an input files both versions use:
 * Tab-separated file (TSV) with coverage for each target region (see the detailed description below).
-* TSV-file with coordinates for each target region. They should correspond to target regions of the coverage file.
+* TSV-file with coordinates for each target region. They should correspond to target regions of the coverage file. The coordinates should be 1-based and fully closed.
 
 *Other options and input files are optional.*
 ### Input file format
@@ -53,3 +53,6 @@ BRACNAC can be used with graphical interface or in command-line version. As an i
 * `-del2` Normalized value of coverage for considering an amplicon as probably deleted (default: 1.4)
 * `-dupl1` Normalized value of coverage for considering an amplicon as likely duplicated (default: 2.8)
 * `-dupl2` Normalized value of coverage for considering an amplicon as probably duplicated (default: 2.7)
+
+#### Note
+If you want to change exon coordinates in exon_coordinates.py, your exon coordinates should be 1-based and fully closed.
