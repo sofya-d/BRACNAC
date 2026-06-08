@@ -5,6 +5,41 @@ import math
 import numpy as np
 import statistics as stat
 import itertools
+import pandas as pd
+
+def write_cnv_table(sample: str, cnv_lst: list, score_lst: list, pvalue_lst: list, CNVTable_dirpath: str):
+    """
+    Create a CNV table with CNVs from the output plot title.
+    """
+    # Round p-values
+    pvalue_lst = [round(float(pvalue), 3) for pvalue in pvalue_lst]
+    # Divide each CNV to CNV type, gene, and exon lists to create a data frame later
+    cnv_lst_lst = [cnv.split(',') for cnv in cnv_lst]
+    cnv_type_lst = []
+    gene_lst = []
+    exon_lst = []
+    for cnv_lst in cnv_lst_lst:
+        cnv_types = []
+        genes = []
+        exons = []
+        for cnv in cnv_lst:
+            cnv_type, gene, exon = cnv.split('_')
+            cnv_types.append(cnv_type)
+            genes.append(gene)
+            exons.append(exon)
+        same_cnv_type = len(set(cnv_types)) == 1
+        same_gene = len(set(genes)) == 1
+        if same_cnv_type and same_gene:
+            cnv_type_lst.append(cnv_types[0])
+            gene_lst.append(genes[0])
+            exon_lst.append('_'.join(exons))
+        else:
+            raise ValueError(f'Multiple non-consecutive exon CNV {cnv_lst} has either different CNV type, or gene, or both for different exons in sample {sample}.')
+    # Create a data frame
+    cnv_df = pd.DataFrame({'gene': gene_lst, 'cnv_type': cnv_type_lst, 'exon': exon_lst, 'score': score_lst, 'pvalue': pvalue_lst})
+    cnv_df = cnv_df.sort_values('gene')
+    CNVTable_filepath = f'{CNVTable_dirpath}/{sample}_CNV_BRACNAC.tsv'
+    cnv_df.to_csv(CNVTable_filepath, sep='\t', index=False)
 
 def detect_CNVs(data3,
                 sampleNum,
@@ -18,7 +53,8 @@ def detect_CNVs(data3,
                 exonToAmpls,
                 amplToIntron,
                 brca1AmpliconNum,
-                step,args):
+                step,args,
+                CNVTable_dirpath):
     if step==1:
         minScore=args.minScore
         maxPvalue=args.maxPvalue
@@ -395,6 +431,14 @@ def detect_CNVs(data3,
             text=sampleNames[sampleNum]+' ('+sampleIds[sampleNames[sampleNum].replace('patient_','')]+')\n'
         else:
             text=sampleNames[sampleNum]+'\n'
+        
+        # Create variables to write CNV table data to
+        sample = sampleNames[sampleNum]
+        cnv_lst = []
+        score_lst = []
+        pvalue_lst = []
+        # Create variables to write CNV table data to
+        
         if len(ads)>0:
             consideredExons=set()
             for delCNV in sorted(ads,
@@ -406,6 +450,15 @@ def detect_CNVs(data3,
                 text+='Deletion: '+delCNV+' (Score='+adsScores[ads.index(delCNV)]+', p-value='+adsValues[ads.index(delCNV)]+')\n'
                 consideredExons.update(set(range(bestAds[ads.index(delCNV)][0],
                                                  bestAds[ads.index(delCNV)][1]+1)))
+
+        # Uppend CNV data to lists
+        score = adsScores[ads.index(delCNV)]
+        pvalue = adsValues[ads.index(delCNV)]
+        cnv_lst.append(delCNV)
+        score_lst.append(score)
+        pvalue_lst.append(pvalue)
+        # Uppend CNV data to lists
+        
         else:
             text+='Deletions: No\n'
         if len(ais)>0:
@@ -419,8 +472,20 @@ def detect_CNVs(data3,
                 text+='Insertion: '+insCNV+' (Score='+aisScores[ais.index(insCNV)]+', p-value='+aisValues[ais.index(insCNV)]+')\n'
                 consideredExons.update(set(range(bestAis[ais.index(insCNV)][0],
                                                  bestAis[ais.index(insCNV)][1]+1)))
+
+        # Uppend CNV data to lists
+        score = aisScores[ais.index(insCNV)]
+        pvalue = aisValues[ais.index(insCNV)]
+        cnv_lst.append(insCNV)
+        score_lst.append(score)
+        pvalue_lst.append(pvalue)
+        # Uppend CNV data to lists
+        
         else:
             text+='Insertions: No'
+        
+        write_cnv_table(sample, cnv_lst, score_lst, pvalue_lst, CNVTable_dirpath)
+        
         return(text,newCols,ampliconsColor)
     else:
         return(obviousCnvSamples)
