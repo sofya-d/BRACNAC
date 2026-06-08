@@ -89,6 +89,10 @@ class BRACNAC(QObject):
         lowCovAmplicons,maxi,maxj,colNames,sampleNames=inputData[3:8]
         dirName,outFilePart,minYs,maxYs,allValVars=inputData[8:]
 
+        # Create direcotry for output CNV tables
+        CNVTable_dirpath = f'{dirName}/CNV_tables'
+        os.makedirs(CNVTable_dirpath, exist_ok=True)
+
         # Create file for output
         wb,ws,f0,f1=createOutputFile(self.outFile,
                                      colNames,
@@ -140,7 +144,8 @@ class BRACNAC(QObject):
                                              exonToAmpls,
                                              amplToIntron,
                                              brca1AmpliconNum,
-                                             step,self)
+                                             step,self,
+                                             CNVTable_dirpath)
 
                     if step==1:
                         plotTitle,newCols,ampliconsColor=detectCnvOut
